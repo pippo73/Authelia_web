@@ -206,7 +206,10 @@ function clientRow(client, index) {
     <label>${esc(t("client.name"))}
       <input class="c-name" value="${esc(client.client_name)}" placeholder="My App" /></label>
     <label>${esc(t("client.secret"))}
-      <input class="c-secret" value="${esc(client.client_secret)}" placeholder="$pbkdf2-sha512$..." /></label>
+      <span class="input-with-btn">
+        <input class="c-secret" value="${esc(client.client_secret)}" placeholder="plaintext → Hash, or paste a hash" />
+        <button type="button" class="ghost btn-hash">${esc(t("client.hash"))}</button>
+      </span></label>
     <label>${esc(t("client.authPolicy"))}
       <select class="c-policy">${opts(["", "one_factor", "two_factor"], client.authorization_policy)}</select></label>
     <label>${esc(t("client.redirectUris"))}
@@ -223,7 +226,23 @@ function clientRow(client, index) {
       <select class="c-tokenauth">${opts(["", "client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "none"], client.token_endpoint_auth_method)}</select></label>
   `;
   box.appendChild(grid);
+  grid.querySelector(".btn-hash").onclick = () => hashSecret(grid.querySelector(".c-secret"));
   return box;
+}
+
+// Hash an OIDC client secret in place (argon2id, Authelia-compatible). The app
+// consuming the client keeps the plaintext; Authelia stores this hash.
+async function hashSecret(input) {
+  const value = input.value.trim();
+  if (!value) return;
+  if (value.startsWith("$") && !confirm(t("client.hashConfirm"))) return;
+  try {
+    const { hash } = await api("/api/hash", { password: value });
+    input.value = hash;
+    setStatus("genStatus", t("client.hashed"), "ok");
+  } catch (e) {
+    setStatus("genStatus", t("status.error", { msg: e.message }), "err");
+  }
 }
 
 function collectClients() {

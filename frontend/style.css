@@ -260,6 +260,11 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 
 .row { display: flex; gap: 10px; margin-top: 10px; }
 
+/* input paired with an inline action button (e.g. client secret + Hash) */
+.input-with-btn { display: flex; gap: 6px; align-items: stretch; }
+.input-with-btn input { flex: 1; min-width: 0; }
+.btn-hash { padding: 6px 12px; white-space: nowrap; }
+
 .status { font-size: 12px; color: var(--muted); }
 .status.ok { color: var(--ok); }
 .status.err { color: var(--danger); }
