@@ -14,7 +14,7 @@ password (**argon2id**, parametri di default di Authelia) è fatto lato server.
 docker compose up --build
 ```
 
-Poi apri <http://localhost:8080>.
+Poi apri <http://localhost:8089> (la porta host è definita in `compose.yml`).
 
 Senza Docker (per sviluppo):
 
