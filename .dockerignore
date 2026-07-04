@@ -1,0 +1,9 @@
+.git
+.claude
+MD
+il-mio-github
+__pycache__
+*.pyc
+.venv
+sample
+README.md

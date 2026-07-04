@@ -1,0 +1,33 @@
+---
+# Sample Authelia configuration (v4.38+) to try out the GUI.
+theme: light
+server:
+  address: 'tcp://:9091'
+log:
+  level: info
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+access_control:
+  default_policy: deny
+  rules:
+    - domain: 'public.example.com'
+      policy: bypass
+    - domain: 'secure.example.com'
+      policy: two_factor
+      subject:
+        - 'group:admins'
+session:
+  name: authelia_session
+  expiration: '1h'
+  inactivity: '5m'
+  remember_me: '1M'
+  cookies:
+    - domain: 'example.com'
+      authelia_url: 'https://auth.example.com'
+storage:
+  local:
+    path: /config/db.sqlite3
+notifier:
+  filesystem:
+    filename: /config/notification.txt

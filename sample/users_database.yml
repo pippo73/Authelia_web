@@ -1,0 +1,10 @@
+---
+users:
+  john:
+    disabled: false
+    displayname: 'John Doe'
+    password: '$argon2id$v=19$m=65536,t=3,p=4$YWJjZGVmZ2hpamtsbW5vcA$B0j0qBoZ3v4Q2yZ7uJ2y1H0mE8n7cRk2sT3wQ5xL9aA'
+    email: john@example.com
+    groups:
+      - admins
+      - dev

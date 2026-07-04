@@ -1,0 +1,7 @@
+services:
+  authelia-config-gui:
+    build: .
+    container_name: authelia-config-gui
+    ports:
+      - "8080:8080"
+    restart: unless-stopped

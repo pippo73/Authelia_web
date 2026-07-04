@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Authelia Config GUI</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🛡️</span>
+      <div>
+        <h1>Authelia Config GUI</h1>
+        <p class="sub" data-i18n="brand.subtitle">Load, edit and generate Authelia configuration files</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <select id="langSelect" class="lang-select" aria-label="Language" data-i18n-title="lang.label"></select>
+      <label class="switch" data-i18n-title="switch.advancedTitle">
+        <input type="checkbox" id="advancedToggle" />
+        <span data-i18n="switch.advanced">Advanced configuration</span>
+      </label>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-file="config">configuration.yml</button>
+    <button class="tab" data-file="users">users_database.yml</button>
+  </nav>
+
+  <main>
+    <!-- File load bar -->
+    <section class="loadbar">
+      <input type="file" id="fileInput" accept=".yml,.yaml,text/yaml" />
+      <button id="loadSampleBtn" class="ghost" data-i18n="loadbar.sample">Load example</button>
+      <button id="newBtn" class="ghost" data-i18n="loadbar.new">New (empty)</button>
+      <span id="loadStatus" class="status"></span>
+    </section>
+
+    <!-- ===================== CONFIGURATION.YML ===================== -->
+    <section id="section-config" class="editor">
+      <div class="basic-forms">
+        <div class="card">
+          <h2 data-i18n="card.general">General</h2>
+          <div class="grid">
+            <label><span data-i18n="field.theme">Theme</span>
+              <select id="cfg_theme">
+                <option value="" data-i18n="opt.unset">(not set)</option>
+                <option value="light">light</option>
+                <option value="dark">dark</option>
+                <option value="grey">grey</option>
+                <option value="auto">auto</option>
+              </select>
+            </label>
+            <label><span data-i18n="field.logLevel">Log level</span>
+              <select id="cfg_log_level">
+                <option value="" data-i18n="opt.unset">(not set)</option>
+                <option value="trace">trace</option>
+                <option value="debug">debug</option>
+                <option value="info">info</option>
+                <option value="warn">warn</option>
+                <option value="error">error</option>
+              </select>
+            </label>
+            <label><span data-i18n="field.serverAddress">Server address</span>
+              <input id="cfg_server_address" placeholder="tcp://:9091" />
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 data-i18n="card.session">Session</h2>
+          <div class="grid">
+            <label><span data-i18n="field.sessionName">Cookie name</span>
+              <input id="cfg_session_name" placeholder="authelia_session" />
+            </label>
+            <label><span data-i18n="field.domain">Domain</span>
+              <input id="cfg_session_domain" placeholder="example.com" />
+            </label>
+            <label><span data-i18n="field.autheliaUrl">Authelia URL</span>
+              <input id="cfg_session_authelia_url" placeholder="https://auth.example.com" />
+            </label>
+            <label><span data-i18n="field.expiration">Expiration</span>
+              <input id="cfg_session_expiration" placeholder="1h" />
+            </label>
+            <label><span data-i18n="field.inactivity">Inactivity</span>
+              <input id="cfg_session_inactivity" placeholder="5m" />
+            </label>
+            <label><span data-i18n="field.rememberMe">Remember me</span>
+              <input id="cfg_session_remember_me" placeholder="1M" />
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 data-i18n="card.accessControl">Access control</h2>
+          <div class="grid">
+            <label><span data-i18n="field.defaultPolicy">Default policy</span>
+              <select id="cfg_default_policy">
+                <option value="" data-i18n="opt.unset">(not set)</option>
+                <option value="deny">deny</option>
+                <option value="bypass">bypass</option>
+                <option value="one_factor">one_factor</option>
+                <option value="two_factor">two_factor</option>
+              </select>
+            </label>
+          </div>
+
+          <h3><span data-i18n="rules.title">Rules</span>
+            <small data-i18n="rules.subtitle">(evaluated in order, first match wins)</small></h3>
+          <p class="hint" data-i18n="rules.hint"></p>
+          <div id="rulesList"></div>
+          <button id="addRuleBtn" class="ghost" data-i18n="rules.add">+ Add rule</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== USERS_DATABASE.YML ===================== -->
+    <section id="section-users" class="editor hidden">
+      <div class="basic-forms">
+        <div class="card">
+          <h2 data-i18n="card.users">Users</h2>
+          <p class="hint" data-i18n="users.hint"></p>
+          <div id="usersList"></div>
+          <button id="addUserBtn" class="ghost" data-i18n="users.add">+ Add user</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ADVANCED: raw YAML ===================== -->
+    <section id="advancedPanel" class="card advanced hidden">
+      <h2><span data-i18n="advanced.title">Raw YAML</span> <small id="advancedFileLabel"></small></h2>
+      <p class="hint" data-i18n="advanced.hint"></p>
+      <textarea id="rawYaml" spellcheck="false" data-i18n-placeholder="advanced.placeholder"></textarea>
+      <div class="row">
+        <button id="applyRawBtn" class="ghost" data-i18n="advanced.apply">Apply to forms</button>
+      </div>
+    </section>
+
+    <!-- ===================== ACTIONS / OUTPUT ===================== -->
+    <section class="actions">
+      <button id="generateBtn" class="primary" data-i18n="actions.generate">Generate file</button>
+      <button id="downloadBtn" class="ghost" disabled data-i18n="actions.download">Download</button>
+      <button id="copyBtn" class="ghost" disabled data-i18n="actions.copy">Copy</button>
+      <span id="genStatus" class="status"></span>
+    </section>
+
+    <section id="outputPanel" class="card output hidden">
+      <h2><span data-i18n="output.title">Generated file</span> <small id="outputFileLabel"></small></h2>
+      <pre id="outputYaml"></pre>
+    </section>
+  </main>
+
+  <script src="/i18n.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
