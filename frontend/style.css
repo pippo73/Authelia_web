@@ -1,4 +1,6 @@
+/* Dark palette (default). --radius is theme-independent. */
 :root {
+  color-scheme: dark;
   --bg: #0f1419;
   --panel: #1a212b;
   --panel-2: #222b37;
@@ -10,6 +12,37 @@
   --danger: #e5534b;
   --ok: #3fb950;
   --radius: 10px;
+}
+
+/* Light palette: shared block, applied when forced light or when "system"
+   is chosen and the OS prefers light. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f6f9;
+  --panel: #ffffff;
+  --panel-2: #eaeef3;
+  --border: #d5dbe3;
+  --text: #1b2430;
+  --muted: #5c6773;
+  --accent: #2f6fe0;
+  --accent-hover: #2a63c9;
+  --danger: #d1352b;
+  --ok: #1f9d3c;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] {
+    color-scheme: light;
+    --bg: #f4f6f9;
+    --panel: #ffffff;
+    --panel-2: #eaeef3;
+    --border: #d5dbe3;
+    --text: #1b2430;
+    --muted: #5c6773;
+    --accent: #2f6fe0;
+    --accent-hover: #2a63c9;
+    --danger: #d1352b;
+    --ok: #1f9d3c;
+  }
 }
 
 * { box-sizing: border-box; }

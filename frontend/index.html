@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Authelia Config GUI</title>
+  <!-- Apply the saved UI theme before first paint to avoid a flash -->
+  <script>
+    (function () {
+      try {
+        document.documentElement.setAttribute(
+          "data-theme", localStorage.getItem("ui-theme") || "system");
+      } catch (e) {}
+    })();
+  </script>
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
@@ -17,6 +26,11 @@
       </div>
     </div>
     <div class="topbar-right">
+      <select id="themeSelect" class="lang-select" aria-label="Appearance" data-i18n-title="ui.theme.label">
+        <option value="system" data-i18n="ui.theme.system">System</option>
+        <option value="light" data-i18n="ui.theme.light">Light</option>
+        <option value="dark" data-i18n="ui.theme.dark">Dark</option>
+      </select>
       <select id="langSelect" class="lang-select" aria-label="Language" data-i18n-title="lang.label"></select>
       <label class="switch" data-i18n-title="switch.advancedTitle">
         <input type="checkbox" id="advancedToggle" />

@@ -361,6 +361,20 @@ async function changeLanguage(code) {
   renderUsers(users);
 }
 
+// ------------------------------------------------------------------ Theme
+// UI appearance: "system" (follows the OS), "light" or "dark". Persisted in
+// localStorage; the actual palette switch is done in CSS via data-theme.
+function initTheme() {
+  const select = $("themeSelect");
+  const saved = localStorage.getItem("ui-theme") || "system";
+  document.documentElement.setAttribute("data-theme", saved);
+  select.value = saved;
+  select.onchange = () => {
+    document.documentElement.setAttribute("data-theme", select.value);
+    localStorage.setItem("ui-theme", select.value);
+  };
+}
+
 async function initLanguage() {
   const select = $("langSelect");
   let langs;
@@ -411,6 +425,7 @@ function wireEvents() {
 
 async function init() {
   wireEvents();
+  initTheme();
   await initLanguage();
   setActiveFile("config");
 }
