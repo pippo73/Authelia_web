@@ -193,8 +193,13 @@ function clientRow(client, index) {
 
   const grid = el("div", "grid");
   const join = (a) => (Array.isArray(a) ? a.join(", ") : a || "");
-  const opts = (list, current) =>
-    list.map((p) => `<option value="${p}" ${p === (current || "") ? "selected" : ""}>${p || esc(t("opt.unset"))}</option>`).join("");
+  const opts = (list, current) => {
+    // keep a custom/current value (e.g. a named authorization_policy) so it is not lost
+    const values = current && !list.includes(current) ? [current, ...list] : list;
+    return values
+      .map((p) => `<option value="${esc(p)}" ${p === (current || "") ? "selected" : ""}>${p ? esc(p) : esc(t("opt.unset"))}</option>`)
+      .join("");
+  };
   grid.innerHTML = `
     <label>${esc(t("client.id"))}
       <input class="c-id" value="${esc(client.client_id)}" placeholder="my-app" /></label>
