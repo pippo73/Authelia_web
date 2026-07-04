@@ -115,6 +115,15 @@ function renderConfigForms() {
   fillInput("cfg_session_remember_me", b.session_remember_me);
   fillInput("cfg_default_policy", b.default_policy);
   renderRules(b.rules || []);
+  // identity_providers.oidc
+  fillInput("cfg_oidc_hmac_secret", b.oidc_hmac_secret);
+  fillInput("cfg_oidc_enforce_pkce", b.oidc_enforce_pkce);
+  fillInput("cfg_oidc_ls_access", b.oidc_ls_access);
+  fillInput("cfg_oidc_ls_id", b.oidc_ls_id);
+  fillInput("cfg_oidc_ls_refresh", b.oidc_ls_refresh);
+  fillInput("cfg_oidc_ls_code", b.oidc_ls_code);
+  $("cfg_oidc_debug").checked = !!b.oidc_debug;
+  renderClients(b.oidc_clients || []);
 }
 
 function renderRules(rules) {
@@ -165,6 +174,69 @@ function collectRules() {
   }));
 }
 
+// ------------------------------------------------------------------ OIDC clients
+function renderClients(list) {
+  const clients = list || (state.config.basic && state.config.basic.oidc_clients) || [];
+  const container = $("clientsList");
+  container.innerHTML = "";
+  clients.forEach((c, i) => container.appendChild(clientRow(c, i)));
+}
+
+function clientRow(client, index) {
+  const box = el("div", "rule");
+  const head = el("div", "rule-head");
+  head.appendChild(el("span", "num", t("client.label", { n: index + 1 })));
+  const del = el("button", "btn-del", t("common.delete"));
+  del.onclick = () => box.remove();
+  head.appendChild(del);
+  box.appendChild(head);
+
+  const grid = el("div", "grid");
+  const join = (a) => (Array.isArray(a) ? a.join(", ") : a || "");
+  const opts = (list, current) =>
+    list.map((p) => `<option value="${p}" ${p === (current || "") ? "selected" : ""}>${p || esc(t("opt.unset"))}</option>`).join("");
+  grid.innerHTML = `
+    <label>${esc(t("client.id"))}
+      <input class="c-id" value="${esc(client.client_id)}" placeholder="my-app" /></label>
+    <label>${esc(t("client.name"))}
+      <input class="c-name" value="${esc(client.client_name)}" placeholder="My App" /></label>
+    <label>${esc(t("client.secret"))}
+      <input class="c-secret" value="${esc(client.client_secret)}" placeholder="$pbkdf2-sha512$..." /></label>
+    <label>${esc(t("client.authPolicy"))}
+      <select class="c-policy">${opts(["", "one_factor", "two_factor"], client.authorization_policy)}</select></label>
+    <label>${esc(t("client.redirectUris"))}
+      <input class="c-redirect" value="${esc(join(client.redirect_uris))}" placeholder="https://app.example.com/oauth2/callback" /></label>
+    <label>${esc(t("client.scopes"))}
+      <input class="c-scopes" value="${esc(join(client.scopes))}" placeholder="openid, profile, email, groups" /></label>
+    <label class="checkbox-row">
+      <input class="c-public" type="checkbox" ${client.public ? "checked" : ""} /> ${esc(t("client.public"))}</label>
+    <label class="advanced-only">${esc(t("client.grantTypes"))}
+      <input class="c-grant" value="${esc(join(client.grant_types))}" placeholder="authorization_code, refresh_token" /></label>
+    <label class="advanced-only">${esc(t("client.responseTypes"))}
+      <input class="c-response" value="${esc(join(client.response_types))}" placeholder="code" /></label>
+    <label class="advanced-only">${esc(t("client.tokenAuth"))}
+      <select class="c-tokenauth">${opts(["", "client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "none"], client.token_endpoint_auth_method)}</select></label>
+  `;
+  box.appendChild(grid);
+  return box;
+}
+
+function collectClients() {
+  const split = (v) => v.split(",").map((s) => s.trim()).filter(Boolean);
+  return [...document.querySelectorAll("#clientsList .rule")].map((box) => ({
+    client_id: box.querySelector(".c-id").value,
+    client_name: box.querySelector(".c-name").value,
+    client_secret: box.querySelector(".c-secret").value,
+    public: box.querySelector(".c-public").checked,
+    authorization_policy: box.querySelector(".c-policy").value,
+    redirect_uris: split(box.querySelector(".c-redirect").value),
+    scopes: split(box.querySelector(".c-scopes").value),
+    grant_types: split(box.querySelector(".c-grant").value),
+    response_types: split(box.querySelector(".c-response").value),
+    token_endpoint_auth_method: box.querySelector(".c-tokenauth").value,
+  }));
+}
+
 function collectConfigBasic() {
   return {
     theme: $("cfg_theme").value,
@@ -178,6 +250,15 @@ function collectConfigBasic() {
     session_remember_me: $("cfg_session_remember_me").value,
     default_policy: $("cfg_default_policy").value,
     rules: collectRules(),
+    oidc_present: !!(state.config.basic && state.config.basic.oidc_present),
+    oidc_hmac_secret: $("cfg_oidc_hmac_secret").value,
+    oidc_enforce_pkce: $("cfg_oidc_enforce_pkce").value,
+    oidc_debug: $("cfg_oidc_debug").checked,
+    oidc_ls_access: $("cfg_oidc_ls_access").value,
+    oidc_ls_id: $("cfg_oidc_ls_id").value,
+    oidc_ls_refresh: $("cfg_oidc_ls_refresh").value,
+    oidc_ls_code: $("cfg_oidc_ls_code").value,
+    oidc_clients: collectClients(),
   };
 }
 
@@ -312,6 +393,31 @@ session:
   cookies:
     - domain: 'example.com'
       authelia_url: 'https://auth.example.com'
+identity_providers:
+  oidc:
+    hmac_secret: 'insecure_secret_change_me'
+    jwks:
+      - key_id: default
+        algorithm: RS256
+        use: sig
+        key: |
+          -----BEGIN PRIVATE KEY-----
+          REPLACE_WITH_YOUR_PRIVATE_KEY
+          -----END PRIVATE KEY-----
+    clients:
+      - client_id: 'grafana'
+        client_name: 'Grafana'
+        client_secret: '$pbkdf2-sha512$310000$saltsaltsaltsalt$hashhashhash'
+        public: false
+        authorization_policy: two_factor
+        consent_mode: explicit
+        redirect_uris:
+          - 'https://grafana.example.com/login/generic_oauth'
+        scopes:
+          - openid
+          - profile
+          - email
+          - groups
 storage:
   local:
     path: /config/db.sqlite3
@@ -356,9 +462,11 @@ function esc(s) {
 async function changeLanguage(code) {
   const rules = collectRules();
   const users = collectUsers();
+  const clients = collectClients();
   await I18n.setLanguage(code);
   renderRules(rules);
   renderUsers(users);
+  renderClients(clients);
 }
 
 // ------------------------------------------------------------------ Theme
@@ -416,6 +524,11 @@ function wireEvents() {
     $("usersList").appendChild(userRow(
       { username: "", displayname: "", email: "", groups: [], disabled: false, password: "" },
       $("usersList").children.length));
+  $("addClientBtn").onclick = () =>
+    $("clientsList").appendChild(clientRow(
+      { client_id: "", client_name: "", client_secret: "", public: false, authorization_policy: "",
+        redirect_uris: [], scopes: [], grant_types: [], response_types: [], token_endpoint_auth_method: "" },
+      $("clientsList").children.length));
 
   $("applyRawBtn").onclick = () => loadText($("rawYaml").value);
   $("generateBtn").onclick = generate;

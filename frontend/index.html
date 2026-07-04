@@ -129,6 +129,38 @@
           <div id="rulesList"></div>
           <button id="addRuleBtn" class="ghost" data-i18n="rules.add">+ Add rule</button>
         </div>
+
+        <div class="card">
+          <h2 data-i18n="card.oidc">Identity Providers (OIDC)</h2>
+          <p class="hint" data-i18n="oidc.hint"></p>
+          <div class="grid">
+            <label><span data-i18n="oidc.hmacSecret">HMAC secret</span>
+              <input id="cfg_oidc_hmac_secret" placeholder="random_secret" /></label>
+            <label class="advanced-only"><span data-i18n="oidc.enforcePkce">Enforce PKCE</span>
+              <select id="cfg_oidc_enforce_pkce">
+                <option value="" data-i18n="opt.unset">(not set)</option>
+                <option value="never">never</option>
+                <option value="public_clients_only">public_clients_only</option>
+                <option value="always">always</option>
+              </select></label>
+            <label class="advanced-only"><span data-i18n="oidc.lifespanAccess">Access token lifespan</span>
+              <input id="cfg_oidc_ls_access" placeholder="1h" /></label>
+            <label class="advanced-only"><span data-i18n="oidc.lifespanId">ID token lifespan</span>
+              <input id="cfg_oidc_ls_id" placeholder="1h" /></label>
+            <label class="advanced-only"><span data-i18n="oidc.lifespanRefresh">Refresh token lifespan</span>
+              <input id="cfg_oidc_ls_refresh" placeholder="90m" /></label>
+            <label class="advanced-only"><span data-i18n="oidc.lifespanCode">Authorize code lifespan</span>
+              <input id="cfg_oidc_ls_code" placeholder="1m" /></label>
+            <label class="advanced-only checkbox-row">
+              <input type="checkbox" id="cfg_oidc_debug" />
+              <span data-i18n="oidc.debug">Client debug messages</span></label>
+          </div>
+
+          <h3><span data-i18n="oidc.clients">Clients</span></h3>
+          <p class="hint" data-i18n="oidc.clientsHint"></p>
+          <div id="clientsList"></div>
+          <button id="addClientBtn" class="ghost" data-i18n="oidc.addClient">+ Add client</button>
+        </div>
       </div>
     </section>
 

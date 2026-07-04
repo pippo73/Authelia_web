@@ -135,6 +135,28 @@ def parse_config(text: str) -> dict:
             }
         )
 
+    # identity_providers.oidc (OpenID Connect provider)
+    idp = data.get("identity_providers") or {}
+    oidc = idp.get("oidc") or {}
+    lifespans = oidc.get("lifespans") or {}
+    clients = []
+    for client in oidc.get("clients") or []:
+        client = client or {}
+        clients.append(
+            {
+                "client_id": client.get("client_id", ""),
+                "client_name": client.get("client_name", ""),
+                "client_secret": client.get("client_secret", ""),
+                "public": bool(client.get("public", False)),
+                "authorization_policy": client.get("authorization_policy", ""),
+                "redirect_uris": as_list(client.get("redirect_uris")),
+                "scopes": as_list(client.get("scopes")),
+                "grant_types": as_list(client.get("grant_types")),
+                "response_types": as_list(client.get("response_types")),
+                "token_endpoint_auth_method": client.get("token_endpoint_auth_method", ""),
+            }
+        )
+
     return {
         "theme": data.get("theme", ""),
         "log_level": str(get_path(data, "log", "level", default="") or ""),
@@ -149,6 +171,15 @@ def parse_config(text: str) -> dict:
         ),
         "default_policy": ac.get("default_policy", ""),
         "rules": rules,
+        "oidc_present": bool(idp),
+        "oidc_hmac_secret": oidc.get("hmac_secret", ""),
+        "oidc_enforce_pkce": oidc.get("enforce_pkce", ""),
+        "oidc_debug": bool(oidc.get("enable_client_debug_messages", False)),
+        "oidc_ls_access": str(lifespans.get("access_token", "") or ""),
+        "oidc_ls_id": str(lifespans.get("id_token", "") or ""),
+        "oidc_ls_refresh": str(lifespans.get("refresh_token", "") or ""),
+        "oidc_ls_code": str(lifespans.get("authorize_code", "") or ""),
+        "oidc_clients": clients,
     }
 
 
@@ -175,6 +206,33 @@ def _build_rule(rule: dict) -> CommentedMap:
     return out
 
 
+def _build_client(client: dict, base=None) -> CommentedMap:
+    """Build an OIDC client mapping. When `base` (the original client from the
+    source YAML, matched by client_id) is given, unmanaged keys such as
+    consent_mode or pkce_challenge_method are preserved; managed fields are set,
+    or removed when cleared in the form."""
+    out = base if isinstance(base, CommentedMap) else CommentedMap()
+
+    def put(key, value):
+        if value:
+            out[key] = value
+        elif key in out:
+            del out[key]
+
+    put("client_id", client.get("client_id"))
+    put("client_name", client.get("client_name"))
+    put("client_secret", client.get("client_secret"))
+    if client.get("public"):
+        out["public"] = True
+    elif "public" in out:
+        del out["public"]
+    put("authorization_policy", client.get("authorization_policy"))
+    for key in ("redirect_uris", "scopes", "grant_types", "response_types"):
+        put(key, [v.strip() for v in client.get(key, []) if str(v).strip()])
+    put("token_endpoint_auth_method", client.get("token_endpoint_auth_method"))
+    return out
+
+
 def build_config(text: str, basic: dict) -> str:
     data = load_yaml(text)
 
@@ -185,46 +243,102 @@ def build_config(text: str, basic: dict) -> str:
     if basic.get("server_address"):
         set_path(data, ["server", "address"], basic["server_address"])
 
-    # Session
-    if "session" not in data or not isinstance(data.get("session"), dict):
-        data["session"] = CommentedMap()
-    session = data["session"]
-    if basic.get("session_name"):
-        session["name"] = basic["session_name"]
-    if basic.get("session_expiration"):
-        session["expiration"] = basic["session_expiration"]
-    if basic.get("session_inactivity"):
-        session["inactivity"] = basic["session_inactivity"]
-    if basic.get("session_remember_me"):
-        # write to the already-present key, otherwise use remember_me (v4.38+)
-        key = "remember_me_duration" if "remember_me_duration" in session else "remember_me"
-        session[key] = basic["session_remember_me"]
+    # Session — only create/modify when the file has it or the form provides data
+    session_keys = (
+        "session_name", "session_expiration", "session_inactivity",
+        "session_remember_me", "session_domain", "session_authelia_url",
+    )
+    if isinstance(data.get("session"), dict) or any(basic.get(k) for k in session_keys):
+        if not isinstance(data.get("session"), dict):
+            data["session"] = CommentedMap()
+        session = data["session"]
+        if basic.get("session_name"):
+            session["name"] = basic["session_name"]
+        if basic.get("session_expiration"):
+            session["expiration"] = basic["session_expiration"]
+        if basic.get("session_inactivity"):
+            session["inactivity"] = basic["session_inactivity"]
+        if basic.get("session_remember_me"):
+            # write to the already-present key, otherwise use remember_me (v4.38+)
+            key = "remember_me_duration" if "remember_me_duration" in session else "remember_me"
+            session[key] = basic["session_remember_me"]
 
-    domain = (basic.get("session_domain") or "").strip()
-    authelia_url = (basic.get("session_authelia_url") or "").strip()
-    cookies = session.get("cookies")
-    if isinstance(cookies, list) and cookies and isinstance(cookies[0], dict):
-        if domain:
-            cookies[0]["domain"] = domain
-        if authelia_url:
-            cookies[0]["authelia_url"] = authelia_url
-    elif domain or authelia_url:
-        # v4.38+ schema: session.cookies is a list
-        cookie = CommentedMap()
-        if domain:
-            cookie["domain"] = domain
-        if authelia_url:
-            cookie["authelia_url"] = authelia_url
-        session["cookies"] = [cookie]
+        domain = (basic.get("session_domain") or "").strip()
+        authelia_url = (basic.get("session_authelia_url") or "").strip()
+        cookies = session.get("cookies")
+        if isinstance(cookies, list) and cookies and isinstance(cookies[0], dict):
+            if domain:
+                cookies[0]["domain"] = domain
+            if authelia_url:
+                cookies[0]["authelia_url"] = authelia_url
+        elif domain or authelia_url:
+            # v4.38+ schema: session.cookies is a list
+            cookie = CommentedMap()
+            if domain:
+                cookie["domain"] = domain
+            if authelia_url:
+                cookie["authelia_url"] = authelia_url
+            session["cookies"] = [cookie]
 
-    # Access control
-    if "access_control" not in data or not isinstance(data.get("access_control"), dict):
-        data["access_control"] = CommentedMap()
-    ac = data["access_control"]
-    if basic.get("default_policy"):
-        ac["default_policy"] = basic["default_policy"]
-    if "rules" in basic:
-        ac["rules"] = [_build_rule(r) for r in basic["rules"]]
+    # Access control — same guard: don't inject an empty section
+    rules_built = [_build_rule(r) for r in basic.get("rules") or []]
+    if isinstance(data.get("access_control"), dict) or basic.get("default_policy") or rules_built:
+        if not isinstance(data.get("access_control"), dict):
+            data["access_control"] = CommentedMap()
+        ac = data["access_control"]
+        if basic.get("default_policy"):
+            ac["default_policy"] = basic["default_policy"]
+        if rules_built or "rules" in ac:
+            ac["rules"] = rules_built
+
+    # identity_providers.oidc — only touch it when the file already had it or the
+    # form provides OIDC data, so we never inject an empty section into a config
+    # that doesn't use OIDC. Untouched keys (jwks, cors, ...) are preserved.
+    lifespans = {
+        "access_token": basic.get("oidc_ls_access"),
+        "authorize_code": basic.get("oidc_ls_code"),
+        "id_token": basic.get("oidc_ls_id"),
+        "refresh_token": basic.get("oidc_ls_refresh"),
+    }
+    lifespans = {k: v for k, v in lifespans.items() if v}
+    form_clients = basic.get("oidc_clients") or []
+    oidc_active = (
+        basic.get("oidc_present")
+        or basic.get("oidc_hmac_secret")
+        or basic.get("oidc_enforce_pkce")
+        or basic.get("oidc_debug")
+        or lifespans
+        or form_clients
+    )
+    if oidc_active:
+        if not isinstance(data.get("identity_providers"), dict):
+            data["identity_providers"] = CommentedMap()
+        idp = data["identity_providers"]
+        if not isinstance(idp.get("oidc"), dict):
+            idp["oidc"] = CommentedMap()
+        oidc = idp["oidc"]
+        if basic.get("oidc_hmac_secret"):
+            oidc["hmac_secret"] = basic["oidc_hmac_secret"]
+        if basic.get("oidc_enforce_pkce"):
+            oidc["enforce_pkce"] = basic["oidc_enforce_pkce"]
+        if basic.get("oidc_debug"):
+            oidc["enable_client_debug_messages"] = True
+        if lifespans:
+            if not isinstance(oidc.get("lifespans"), dict):
+                oidc["lifespans"] = CommentedMap()
+            for key, value in lifespans.items():
+                oidc["lifespans"][key] = value
+        # rebuild clients, merging by client_id to keep unmanaged per-client keys
+        existing_by_id = {}
+        if isinstance(oidc.get("clients"), list):
+            for existing in oidc["clients"]:
+                if isinstance(existing, dict) and existing.get("client_id"):
+                    existing_by_id[existing["client_id"]] = existing
+        if form_clients or "clients" in oidc:
+            oidc["clients"] = [
+                _build_client(c, existing_by_id.get(c.get("client_id")))
+                for c in form_clients
+            ]
 
     return dump_yaml(data)
 
