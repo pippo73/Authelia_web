@@ -47,6 +47,9 @@ const I18n = (() => {
     root.querySelectorAll("[data-i18n-title]").forEach((e) => {
       e.title = t(e.getAttribute("data-i18n-title"));
     });
+    root.querySelectorAll("[data-i18n-tip]").forEach((e) => {
+      e.setAttribute("data-tip", t(e.getAttribute("data-i18n-tip")));
+    });
   }
 
   // Pick the initial language: saved choice, else browser language, else en/first.

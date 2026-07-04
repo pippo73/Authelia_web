@@ -13,6 +13,8 @@ const state = {
 const FILE_NAMES = { config: "configuration.yml", users: "users_database.yml" };
 
 const t = (key, params) => I18n.t(key, params);
+// Small "?" help icon with a hover balloon, for dynamically-built field labels.
+const help = (key) => `<span class="help" data-tip="${esc(t(key))}">?</span>`;
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, html) => {
@@ -144,19 +146,19 @@ function ruleRow(rule, index) {
   const grid = el("div", "grid");
   const join = (a) => (Array.isArray(a) ? a.join(", ") : a || "");
   grid.innerHTML = `
-    <label>${esc(t("rule.domains"))}
+    <label>${esc(t("rule.domains"))}${help("help.rule.domains")}
       <input class="r-domain" value="${esc(join(rule.domain))}" placeholder="app.example.com" /></label>
-    <label>${esc(t("rule.policy"))}
+    <label>${esc(t("rule.policy"))}${help("help.rule.policy")}
       <select class="r-policy">
         ${["", "deny", "bypass", "one_factor", "two_factor"].map(
           (p) => `<option value="${p}" ${p === (rule.policy || "") ? "selected" : ""}>${p || esc(t("opt.none"))}</option>`
         ).join("")}
       </select></label>
-    <label>${esc(t("rule.subject"))}
+    <label>${esc(t("rule.subject"))}${help("help.rule.subject")}
       <input class="r-subject" value="${esc(join(rule.subject))}" placeholder="group:admins" /></label>
-    <label>${esc(t("rule.resources"))}
+    <label>${esc(t("rule.resources"))}${help("help.rule.resources")}
       <input class="r-resources" value="${esc(join(rule.resources))}" placeholder="^/api/.*$" /></label>
-    <label>${esc(t("rule.networks"))}
+    <label>${esc(t("rule.networks"))}${help("help.rule.networks")}
       <input class="r-networks" value="${esc(join(rule.networks))}" placeholder="192.168.1.0/24" /></label>
   `;
   box.appendChild(grid);
@@ -201,28 +203,28 @@ function clientRow(client, index) {
       .join("");
   };
   grid.innerHTML = `
-    <label>${esc(t("client.id"))}
+    <label>${esc(t("client.id"))}${help("help.client.id")}
       <input class="c-id" value="${esc(client.client_id)}" placeholder="my-app" /></label>
-    <label>${esc(t("client.name"))}
+    <label>${esc(t("client.name"))}${help("help.client.name")}
       <input class="c-name" value="${esc(client.client_name)}" placeholder="My App" /></label>
-    <label>${esc(t("client.secret"))}
+    <label>${esc(t("client.secret"))}${help("help.client.secret")}
       <span class="input-with-btn">
         <input class="c-secret" value="${esc(client.client_secret)}" placeholder="plaintext → Hash, or paste a hash" />
         <button type="button" class="ghost btn-hash">${esc(t("client.hash"))}</button>
       </span></label>
-    <label>${esc(t("client.authPolicy"))}
+    <label>${esc(t("client.authPolicy"))}${help("help.client.authPolicy")}
       <select class="c-policy">${opts(["", "one_factor", "two_factor"], client.authorization_policy)}</select></label>
-    <label>${esc(t("client.redirectUris"))}
+    <label>${esc(t("client.redirectUris"))}${help("help.client.redirectUris")}
       <input class="c-redirect" value="${esc(join(client.redirect_uris))}" placeholder="https://app.example.com/oauth2/callback" /></label>
-    <label>${esc(t("client.scopes"))}
+    <label>${esc(t("client.scopes"))}${help("help.client.scopes")}
       <input class="c-scopes" value="${esc(join(client.scopes))}" placeholder="openid, profile, email, groups" /></label>
     <label class="checkbox-row">
-      <input class="c-public" type="checkbox" ${client.public ? "checked" : ""} /> ${esc(t("client.public"))}</label>
-    <label class="advanced-only">${esc(t("client.grantTypes"))}
+      <input class="c-public" type="checkbox" ${client.public ? "checked" : ""} /> ${esc(t("client.public"))}${help("help.client.public")}</label>
+    <label class="advanced-only">${esc(t("client.grantTypes"))}${help("help.client.grantTypes")}
       <input class="c-grant" value="${esc(join(client.grant_types))}" placeholder="authorization_code, refresh_token" /></label>
-    <label class="advanced-only">${esc(t("client.responseTypes"))}
+    <label class="advanced-only">${esc(t("client.responseTypes"))}${help("help.client.responseTypes")}
       <input class="c-response" value="${esc(join(client.response_types))}" placeholder="code" /></label>
-    <label class="advanced-only">${esc(t("client.tokenAuth"))}
+    <label class="advanced-only">${esc(t("client.tokenAuth"))}${help("help.client.tokenAuth")}
       <select class="c-tokenauth">${opts(["", "client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "none"], client.token_endpoint_auth_method)}</select></label>
   `;
   box.appendChild(grid);
@@ -309,18 +311,18 @@ function userRow(user, index) {
 
   const grid = el("div", "grid");
   grid.innerHTML = `
-    <label>${esc(t("user.username"))}
+    <label>${esc(t("user.username"))}${help("help.user.username")}
       <input class="u-username" value="${esc(user.username)}" placeholder="john" /></label>
-    <label>${esc(t("user.displayname"))}
+    <label>${esc(t("user.displayname"))}${help("help.user.displayname")}
       <input class="u-displayname" value="${esc(user.displayname)}" placeholder="John Doe" /></label>
-    <label>${esc(t("user.email"))}
+    <label>${esc(t("user.email"))}${help("help.user.email")}
       <input class="u-email" value="${esc(user.email)}" placeholder="john@example.com" /></label>
-    <label>${esc(t("user.groups"))}
+    <label>${esc(t("user.groups"))}${help("help.user.groups")}
       <input class="u-groups" value="${esc((user.groups || []).join(", "))}" placeholder="admins, dev" /></label>
-    <label>${esc(t("user.newPassword"))}
+    <label>${esc(t("user.newPassword"))}${help("help.user.newPassword")}
       <input class="u-newpass" type="text" value="${esc(user.new_password || "")}" placeholder="${esc(t("user.newPasswordPlaceholder"))}" /></label>
     <label class="checkbox-row">
-      <input class="u-disabled" type="checkbox" ${user.disabled ? "checked" : ""} /> ${esc(t("user.disabled"))}
+      <input class="u-disabled" type="checkbox" ${user.disabled ? "checked" : ""} /> ${esc(t("user.disabled"))}${help("help.user.disabled")}
     </label>
   `;
   box.appendChild(grid);

@@ -60,7 +60,7 @@
         <div class="card">
           <h2 data-i18n="card.general">General</h2>
           <div class="grid">
-            <label><span data-i18n="field.theme">Theme</span>
+            <label><span data-i18n="field.theme">Theme</span><span class="help" data-i18n-tip="help.theme">?</span>
               <select id="cfg_theme">
                 <option value="" data-i18n="opt.unset">(not set)</option>
                 <option value="light">light</option>
@@ -69,7 +69,7 @@
                 <option value="auto">auto</option>
               </select>
             </label>
-            <label><span data-i18n="field.logLevel">Log level</span>
+            <label><span data-i18n="field.logLevel">Log level</span><span class="help" data-i18n-tip="help.logLevel">?</span>
               <select id="cfg_log_level">
                 <option value="" data-i18n="opt.unset">(not set)</option>
                 <option value="trace">trace</option>
@@ -79,7 +79,7 @@
                 <option value="error">error</option>
               </select>
             </label>
-            <label class="advanced-only"><span data-i18n="field.serverAddress">Server address</span>
+            <label class="advanced-only"><span data-i18n="field.serverAddress">Server address</span><span class="help" data-i18n-tip="help.serverAddress">?</span>
               <input id="cfg_server_address" placeholder="tcp://:9091" />
             </label>
           </div>
@@ -88,22 +88,22 @@
         <div class="card">
           <h2 data-i18n="card.session">Session</h2>
           <div class="grid">
-            <label class="advanced-only"><span data-i18n="field.sessionName">Cookie name</span>
+            <label class="advanced-only"><span data-i18n="field.sessionName">Cookie name</span><span class="help" data-i18n-tip="help.sessionName">?</span>
               <input id="cfg_session_name" placeholder="authelia_session" />
             </label>
-            <label><span data-i18n="field.domain">Domain</span>
+            <label><span data-i18n="field.domain">Domain</span><span class="help" data-i18n-tip="help.domain">?</span>
               <input id="cfg_session_domain" placeholder="example.com" />
             </label>
-            <label><span data-i18n="field.autheliaUrl">Authelia URL</span>
+            <label><span data-i18n="field.autheliaUrl">Authelia URL</span><span class="help" data-i18n-tip="help.autheliaUrl">?</span>
               <input id="cfg_session_authelia_url" placeholder="https://auth.example.com" />
             </label>
-            <label class="advanced-only"><span data-i18n="field.expiration">Expiration</span>
+            <label class="advanced-only"><span data-i18n="field.expiration">Expiration</span><span class="help" data-i18n-tip="help.expiration">?</span>
               <input id="cfg_session_expiration" placeholder="1h" />
             </label>
-            <label class="advanced-only"><span data-i18n="field.inactivity">Inactivity</span>
+            <label class="advanced-only"><span data-i18n="field.inactivity">Inactivity</span><span class="help" data-i18n-tip="help.inactivity">?</span>
               <input id="cfg_session_inactivity" placeholder="5m" />
             </label>
-            <label class="advanced-only"><span data-i18n="field.rememberMe">Remember me</span>
+            <label class="advanced-only"><span data-i18n="field.rememberMe">Remember me</span><span class="help" data-i18n-tip="help.rememberMe">?</span>
               <input id="cfg_session_remember_me" placeholder="1M" />
             </label>
           </div>
@@ -112,7 +112,7 @@
         <div class="card">
           <h2 data-i18n="card.accessControl">Access control</h2>
           <div class="grid">
-            <label><span data-i18n="field.defaultPolicy">Default policy</span>
+            <label><span data-i18n="field.defaultPolicy">Default policy</span><span class="help" data-i18n-tip="help.defaultPolicy">?</span>
               <select id="cfg_default_policy">
                 <option value="" data-i18n="opt.unset">(not set)</option>
                 <option value="deny">deny</option>
@@ -134,26 +134,26 @@
           <h2 data-i18n="card.oidc">Identity Providers (OIDC)</h2>
           <p class="hint" data-i18n="oidc.hint"></p>
           <div class="grid">
-            <label><span data-i18n="oidc.hmacSecret">HMAC secret</span>
+            <label><span data-i18n="oidc.hmacSecret">HMAC secret</span><span class="help" data-i18n-tip="help.oidc.hmacSecret">?</span>
               <input id="cfg_oidc_hmac_secret" placeholder="random_secret" /></label>
-            <label class="advanced-only"><span data-i18n="oidc.enforcePkce">Enforce PKCE</span>
+            <label class="advanced-only"><span data-i18n="oidc.enforcePkce">Enforce PKCE</span><span class="help" data-i18n-tip="help.oidc.enforcePkce">?</span>
               <select id="cfg_oidc_enforce_pkce">
                 <option value="" data-i18n="opt.unset">(not set)</option>
                 <option value="never">never</option>
                 <option value="public_clients_only">public_clients_only</option>
                 <option value="always">always</option>
               </select></label>
-            <label class="advanced-only"><span data-i18n="oidc.lifespanAccess">Access token lifespan</span>
+            <label class="advanced-only"><span data-i18n="oidc.lifespanAccess">Access token lifespan</span><span class="help" data-i18n-tip="help.oidc.lifespanAccess">?</span>
               <input id="cfg_oidc_ls_access" placeholder="1h" /></label>
-            <label class="advanced-only"><span data-i18n="oidc.lifespanId">ID token lifespan</span>
+            <label class="advanced-only"><span data-i18n="oidc.lifespanId">ID token lifespan</span><span class="help" data-i18n-tip="help.oidc.lifespanId">?</span>
               <input id="cfg_oidc_ls_id" placeholder="1h" /></label>
-            <label class="advanced-only"><span data-i18n="oidc.lifespanRefresh">Refresh token lifespan</span>
+            <label class="advanced-only"><span data-i18n="oidc.lifespanRefresh">Refresh token lifespan</span><span class="help" data-i18n-tip="help.oidc.lifespanRefresh">?</span>
               <input id="cfg_oidc_ls_refresh" placeholder="90m" /></label>
-            <label class="advanced-only"><span data-i18n="oidc.lifespanCode">Authorize code lifespan</span>
+            <label class="advanced-only"><span data-i18n="oidc.lifespanCode">Authorize code lifespan</span><span class="help" data-i18n-tip="help.oidc.lifespanCode">?</span>
               <input id="cfg_oidc_ls_code" placeholder="1m" /></label>
             <label class="advanced-only checkbox-row">
               <input type="checkbox" id="cfg_oidc_debug" />
-              <span data-i18n="oidc.debug">Client debug messages</span></label>
+              <span data-i18n="oidc.debug">Client debug messages</span><span class="help" data-i18n-tip="help.oidc.debug">?</span></label>
           </div>
 
           <h3><span data-i18n="oidc.clients">Clients</span></h3>
