@@ -1,31 +1,80 @@
 # Authelia Config GUI
 
-Simple web interface to upload, edit, generate,
-Configuration Files (
-	(configuration.yml)
-or
-(users_database.yml)) which are copied onto the service.
-The Backend serves APIs alongwith frontend statically served locally;
-certainly no compilation involved whatsoever!
-All passwords hashing performed remotely since authentication services were deployed outside our realm.
+A simple web interface for **uploading, editing and generating** Authelia’s
+configuration files (`configuration.yml` and `users_database.yml`), which
+can then be copied to the server.
 
----
+A single container: a **FastAPI** (Python) backend that serves both the APIs and the
+static frontend (vanilla HTML/CSS/JS, no build step). Password hashing
+(**argon2id**, Authelia’s default parameters) is performed on the server side.
 
-#### Launch Instructions
-Launch containers :
-docker-compose up --build
-Then visit localhost:http//8089 (Port mapped according to docker.compose.yml )
-Without Containers?
-pip install requirements.txt
-then uvicorn launch_app.run():app --reloader == --port== 8080
+## Getting started
 
------
+```bash
+docker compose up --build
+```
 
-#### How-To Usage Steps
-Select whichever configuration file shall edited ; select Upload button ? Then Select appropriate example template !!!!
-Fill-out Forms Fields properly! Click Apply Changes Button!! And finally Download Result Copy Paste Into Target Server !! All Done !!!
-Note however advanced settings remain unchanged till manually overridden elsewhere , please refer Advanced Section mentioned below.
-Password Field filled clearly displays Hash Algorithm Argon2Id Used By Standard Settings Of Authentication Service Providers As Defined Inside Specified Parameters Provided Via FrontEnd Interface Which Is Fully Automated During Generation Phase Based Upon Input Given Within Form Controls Present At Top Level Screen Display Area Using RuMealy.Yaml Library Ensuring Integrity Preservation While Applying Any Modification Made Through These Interfaces Except Those Direct Manipulations Involved Underneath Raw Editing Mode Activated Once Checked Box Called \Advanced Setup Enabled Flag Has Been Selected Prior Execution Step Occurs Where Users May Choose Their Preference Regarding What Kind Details They Want Included Such As Domain Policy Subject Resource Networks Method Queries Resources Complex Subjects Etc...
-Remember though while applying modifications made possible via standard controls listed herein certain aspects related specifically towards AccessControl Rule Management Are Automatically Regenerated Since Certain Keys Like Methods QuerieResources NetworkSubjects Require More Sophisticated Handling That Goes Beyond Simple Template Matching Capabilities Offered Here Therefore Please Refer Back Again Later Should Need Further Assistance Understanding Behavior Related To Customizing Individual Components Accordingly.
-Please Take Care About Compatibility Issues Between Versions Being Utilized Currently Because Some Features Might Have Changed Over Time So Ensure Your System Version Matches Requirements Before Proceeding Forward Unless Working Around Known Bugs Instead Consider Switching Modes Manual Override Option Whenever Necessary.
-Finally Remember Validation Process Conducted Ahead Deployments Will Verify Entire Configuration Against Schema Specifications Prescribed By Official Documentation Thus Make Sure Everything Appears Correct According To Guidelines Issued Elsewise Deployment Could Fail Unexpected Ways Leading Potential Security Breaches Hence Double Check Every Detail Thoroughly Until Complete Satisfaction Achieved.
+Then open <http://localhost:8089> (the host port is defined in `compose.yml`).
+
+Without Docker (for development):
+
+```bash
+pip install -r backend/requirements.txt
+uvicorn backend.app:app --reload --port 8080
+```
+
+## How to use it
+
+1. At the top, choose which file to edit: `configuration.yml` or `users_database.yml`.
+2. **Upload** the existing file from your hard drive (or use *Upload example* / *New*).
+3. Edit the fields in the forms (**basic** mode).
+4. Tick **Advanced configuration** to open the **raw YAML** editor and
+   edit any details not covered by the forms. *Apply to forms*
+   re-reads the base values from the YAML.
+5. **Generate file** → check the result → **Download** or **Copy** and upload it
+   to the Authelia server.
+
+### User passwords
+
+In the user form, enter the password in plain text in the **New password** field:
+upon generation, it is saved as an `argon2id` hash. If you leave the field blank,
+the existing hash remains unchanged.
+
+## Languages (i18n)
+
+The interface is multilingual. By default: **Italian** and **English**. The language is
+selected from the menu in the top right-hand corner; the choice is saved in the browser and, on startup,
+is detected based on the browser’s language (fallback: English).
+
+### Adding a language
+
+Translations are `key → text` JSON files in [`frontend/locales/`](frontend/locales/).
+To add a language:
+
+1. Copy `frontend/locales/en.json` to `frontend/locales/<code>.json`
+   (e.g. `de.json`, `fr.json`, `es.json`).
+2. Set the `_name` field to the name of the language (e.g. `‘Deutsch’`) and translate
+   all the values. **Do not change the keys.**
+3. Restart (or reload): the backend scans the folder (`GET /api/locales`) and
+   the new language automatically appears in the menu. No code changes required.
+
+Use `en.json` as a reference file: it must contain **all** the keys.
+If a key is missing from a translation, the key itself is displayed.
+
+## Philosophy: surgical changes
+
+**Only** the fields managed by the forms are modified in the uploaded file; comments
+and untouched sections (`storage`, `notifier`, `authentication_backend`, etc.)
+remain intact thanks to `ruamel.yaml`.
+
+## Known limitations (v1)
+
+- **Basic** editing of `access_control` rules **regenerates** the list of
+  supported fields (domain, policy, subject, resources, networks). For
+  advanced rule keys (`methods`, `query`, complex `resources`, nested
+  OR/AND subjects), use **Advanced Configuration** (raw YAML).
+- Basic forms are based on the **Authelia v4.38+** schema (`server.address`,
+  `session.cookies`, `session.remember_me`). Older configurations are fine for
+  reading; for legacy fields, use advanced mode.
+- The tool **does not validate** the entire configuration against the Authelia schema: before
+  deployment, check it using `authelia validate-config`.
