@@ -22,6 +22,14 @@ body {
   font-size: 14px;
 }
 
+/* Header (brand + language + advanced flag + tabs) stays pinned while scrolling */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg);
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -224,3 +232,18 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .status.err { color: var(--danger); }
 
 .hidden { display: none !important; }
+
+/* Advanced flag: non-critical fields and the raw YAML editor are hidden until
+   the "Advanced configuration" flag is enabled (adds .advanced on <body>). */
+label.advanced-only { display: none; }
+body.advanced label.advanced-only { display: flex; }
+
+#advancedPanel { display: none; }
+body.advanced #advancedPanel { display: block; }
+
+/* subtle marker so advanced fields are recognizable when revealed */
+body.advanced label.advanced-only > span::after {
+  content: "•";
+  margin-left: 5px;
+  color: var(--accent);
+}

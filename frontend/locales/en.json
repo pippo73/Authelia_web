@@ -2,7 +2,7 @@
   "_name": "English",
   "brand.subtitle": "Load, edit and generate Authelia configuration files",
   "switch.advanced": "Advanced configuration",
-  "switch.advancedTitle": "Show the raw YAML editor to change any detail",
+  "switch.advancedTitle": "Show non-critical fields and the raw YAML editor",
   "lang.label": "Language",
   "loadbar.sample": "Load example",
   "loadbar.new": "New (empty)",

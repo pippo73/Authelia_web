@@ -2,7 +2,7 @@
   "_name": "Italiano",
   "brand.subtitle": "Carica, modifica e genera i file di configurazione di Authelia",
   "switch.advanced": "Configurazione avanzata",
-  "switch.advancedTitle": "Mostra l'editor YAML grezzo per modificare qualsiasi dettaglio",
+  "switch.advancedTitle": "Mostra i campi non critici e l'editor YAML grezzo",
   "lang.label": "Lingua",
   "loadbar.sample": "Carica esempio",
   "loadbar.new": "Nuovo (vuoto)",

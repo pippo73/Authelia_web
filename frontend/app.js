@@ -60,7 +60,7 @@ function setActiveFile(file) {
 // ------------------------------------------------------------------ Advanced
 function setAdvanced(on) {
   state.advanced = on;
-  $("advancedPanel").classList.toggle("hidden", !on);
+  document.body.classList.toggle("advanced", on);
   if (on) refreshRaw();
 }
 

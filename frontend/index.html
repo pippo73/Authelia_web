@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
+  <div class="app-header">
   <header class="topbar">
     <div class="brand">
       <span class="logo">🛡️</span>
@@ -28,6 +29,7 @@
     <button class="tab active" data-file="config">configuration.yml</button>
     <button class="tab" data-file="users">users_database.yml</button>
   </nav>
+  </div>
 
   <main>
     <!-- File load bar -->
@@ -63,7 +65,7 @@
                 <option value="error">error</option>
               </select>
             </label>
-            <label><span data-i18n="field.serverAddress">Server address</span>
+            <label class="advanced-only"><span data-i18n="field.serverAddress">Server address</span>
               <input id="cfg_server_address" placeholder="tcp://:9091" />
             </label>
           </div>
@@ -72,7 +74,7 @@
         <div class="card">
           <h2 data-i18n="card.session">Session</h2>
           <div class="grid">
-            <label><span data-i18n="field.sessionName">Cookie name</span>
+            <label class="advanced-only"><span data-i18n="field.sessionName">Cookie name</span>
               <input id="cfg_session_name" placeholder="authelia_session" />
             </label>
             <label><span data-i18n="field.domain">Domain</span>
@@ -81,13 +83,13 @@
             <label><span data-i18n="field.autheliaUrl">Authelia URL</span>
               <input id="cfg_session_authelia_url" placeholder="https://auth.example.com" />
             </label>
-            <label><span data-i18n="field.expiration">Expiration</span>
+            <label class="advanced-only"><span data-i18n="field.expiration">Expiration</span>
               <input id="cfg_session_expiration" placeholder="1h" />
             </label>
-            <label><span data-i18n="field.inactivity">Inactivity</span>
+            <label class="advanced-only"><span data-i18n="field.inactivity">Inactivity</span>
               <input id="cfg_session_inactivity" placeholder="5m" />
             </label>
-            <label><span data-i18n="field.rememberMe">Remember me</span>
+            <label class="advanced-only"><span data-i18n="field.rememberMe">Remember me</span>
               <input id="cfg_session_remember_me" placeholder="1M" />
             </label>
           </div>
@@ -129,7 +131,7 @@
     </section>
 
     <!-- ===================== ADVANCED: raw YAML ===================== -->
-    <section id="advancedPanel" class="card advanced hidden">
+    <section id="advancedPanel" class="card advanced">
       <h2><span data-i18n="advanced.title">Raw YAML</span> <small id="advancedFileLabel"></small></h2>
       <p class="hint" data-i18n="advanced.hint"></p>
       <textarea id="rawYaml" spellcheck="false" data-i18n-placeholder="advanced.placeholder"></textarea>
