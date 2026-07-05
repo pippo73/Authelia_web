@@ -151,9 +151,32 @@
               <input id="cfg_oidc_ls_refresh" placeholder="90m" /></label>
             <label class="advanced-only"><span data-i18n="oidc.lifespanCode">Authorize code lifespan</span><span class="help" data-i18n-tip="help.oidc.lifespanCode">?</span>
               <input id="cfg_oidc_ls_code" placeholder="1m" /></label>
+            <label class="advanced-only"><span data-i18n="oidc.lifespanDevice">Device code lifespan</span><span class="help" data-i18n-tip="help.oidc.lifespanDevice">?</span>
+              <input id="cfg_oidc_ls_device" placeholder="10m" /></label>
+            <label class="advanced-only"><span data-i18n="oidc.discoveryAlg">Discovery signing alg</span><span class="help" data-i18n-tip="help.oidc.discoveryAlg">?</span>
+              <select id="cfg_oidc_discovery_alg">
+                <option value="" data-i18n="opt.unset">(not set)</option>
+                <option value="RS256">RS256</option>
+                <option value="ES256">ES256</option>
+                <option value="ES384">ES384</option>
+                <option value="ES512">ES512</option>
+              </select></label>
+            <label class="advanced-only"><span data-i18n="oidc.discoveryKeyId">Discovery signing key ID</span><span class="help" data-i18n-tip="help.oidc.discoveryKeyId">?</span>
+              <input id="cfg_oidc_discovery_key_id" placeholder="key_id" /></label>
+            <label class="advanced-only"><span data-i18n="oidc.minParamEntropy">Minimum parameter entropy</span><span class="help" data-i18n-tip="help.oidc.minParamEntropy">?</span>
+              <input id="cfg_oidc_min_param_entropy" placeholder="8" /></label>
             <label class="advanced-only checkbox-row">
               <input type="checkbox" id="cfg_oidc_debug" />
               <span data-i18n="oidc.debug">Client debug messages</span><span class="help" data-i18n-tip="help.oidc.debug">?</span></label>
+            <label class="advanced-only checkbox-row">
+              <input type="checkbox" id="cfg_oidc_enable_pkce_plain" />
+              <span data-i18n="oidc.pkcePlain">Allow plain PKCE challenge</span><span class="help" data-i18n-tip="help.oidc.pkcePlain">?</span></label>
+            <label class="advanced-only checkbox-row">
+              <input type="checkbox" id="cfg_oidc_stateless_introspection" />
+              <span data-i18n="oidc.statelessIntrospection">Stateless JWT introspection</span><span class="help" data-i18n-tip="help.oidc.statelessIntrospection">?</span></label>
+            <label class="advanced-only checkbox-row">
+              <input type="checkbox" id="cfg_oidc_require_par" />
+              <span data-i18n="oidc.requirePar">Require pushed authorization requests</span><span class="help" data-i18n-tip="help.oidc.requirePar">?</span></label>
           </div>
 
           <h3><span data-i18n="oidc.clients">Clients</span></h3>

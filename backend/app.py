@@ -205,6 +205,32 @@ def parse_config(text: str) -> dict:
                 "pre_configured_consent_duration": str(
                     client.get("pre_configured_consent_duration", "") or ""
                 ),
+                "response_modes": as_list(client.get("response_modes")),
+                "id_token_signed_response_alg": client.get(
+                    "id_token_signed_response_alg", ""
+                ),
+                "authorization_signed_response_alg": client.get(
+                    "authorization_signed_response_alg", ""
+                ),
+                "requested_audience_mode": client.get("requested_audience_mode", ""),
+                "lifespan": client.get("lifespan", ""),
+                "claims_policy": client.get("claims_policy", ""),
+                "audience": as_list(client.get("audience")),
+                "sector_identifier_uri": client.get("sector_identifier_uri", ""),
+                "request_uris": as_list(client.get("request_uris")),
+                "jwks_uri": client.get("jwks_uri", ""),
+                "allow_multiple_auth_methods": bool(
+                    client.get("allow_multiple_auth_methods", False)
+                ),
+                "require_pushed_authorization_requests": bool(
+                    client.get("require_pushed_authorization_requests", False)
+                ),
+                "revocation_endpoint_auth_method": client.get(
+                    "revocation_endpoint_auth_method", ""
+                ),
+                "introspection_endpoint_auth_method": client.get(
+                    "introspection_endpoint_auth_method", ""
+                ),
             }
         )
 
@@ -230,6 +256,15 @@ def parse_config(text: str) -> dict:
         "oidc_ls_id": str(lifespans.get("id_token", "") or ""),
         "oidc_ls_refresh": str(lifespans.get("refresh_token", "") or ""),
         "oidc_ls_code": str(lifespans.get("authorize_code", "") or ""),
+        "oidc_ls_device": str(lifespans.get("device_code", "") or ""),
+        "oidc_enable_pkce_plain": bool(oidc.get("enable_pkce_plain_challenge", False)),
+        "oidc_stateless_introspection": bool(
+            oidc.get("enable_jwt_access_token_stateless_introspection", False)
+        ),
+        "oidc_discovery_alg": oidc.get("discovery_signed_response_alg", ""),
+        "oidc_discovery_key_id": oidc.get("discovery_signed_response_key_id", ""),
+        "oidc_require_par": bool(oidc.get("require_pushed_authorization_requests", False)),
+        "oidc_min_param_entropy": str(oidc.get("minimum_parameter_entropy", "") or ""),
         "oidc_clients": clients,
     }
 
@@ -290,6 +325,26 @@ def _build_client(client: dict, base=None) -> CommentedMap:
     put("userinfo_signed_response_alg", client.get("userinfo_signed_response_alg"))
     put("consent_mode", client.get("consent_mode"))
     put("pre_configured_consent_duration", client.get("pre_configured_consent_duration"))
+    put("response_modes", [v.strip() for v in client.get("response_modes", []) if str(v).strip()])
+    put("id_token_signed_response_alg", client.get("id_token_signed_response_alg"))
+    put("authorization_signed_response_alg", client.get("authorization_signed_response_alg"))
+    put("requested_audience_mode", client.get("requested_audience_mode"))
+    put("lifespan", client.get("lifespan"))
+    put("claims_policy", client.get("claims_policy"))
+    put("audience", [v.strip() for v in client.get("audience", []) if str(v).strip()])
+    put("sector_identifier_uri", client.get("sector_identifier_uri"))
+    put("request_uris", [v.strip() for v in client.get("request_uris", []) if str(v).strip()])
+    put("jwks_uri", client.get("jwks_uri"))
+    put("revocation_endpoint_auth_method", client.get("revocation_endpoint_auth_method"))
+    put("introspection_endpoint_auth_method", client.get("introspection_endpoint_auth_method"))
+    if client.get("allow_multiple_auth_methods"):
+        out["allow_multiple_auth_methods"] = True
+    elif "allow_multiple_auth_methods" in out:
+        del out["allow_multiple_auth_methods"]
+    if client.get("require_pushed_authorization_requests"):
+        out["require_pushed_authorization_requests"] = True
+    elif "require_pushed_authorization_requests" in out:
+        del out["require_pushed_authorization_requests"]
     return out
 
 
@@ -359,6 +414,7 @@ def build_config(text: str, basic: dict) -> str:
         "authorize_code": basic.get("oidc_ls_code"),
         "id_token": basic.get("oidc_ls_id"),
         "refresh_token": basic.get("oidc_ls_refresh"),
+        "device_code": basic.get("oidc_ls_device"),
     }
     lifespans = {k: v for k, v in lifespans.items() if v}
     form_clients = basic.get("oidc_clients") or []
@@ -367,6 +423,12 @@ def build_config(text: str, basic: dict) -> str:
         or basic.get("oidc_hmac_secret")
         or basic.get("oidc_enforce_pkce")
         or basic.get("oidc_debug")
+        or basic.get("oidc_enable_pkce_plain")
+        or basic.get("oidc_stateless_introspection")
+        or basic.get("oidc_discovery_alg")
+        or basic.get("oidc_discovery_key_id")
+        or basic.get("oidc_require_par")
+        or basic.get("oidc_min_param_entropy")
         or lifespans
         or form_clients
     )
@@ -383,6 +445,29 @@ def build_config(text: str, basic: dict) -> str:
             oidc["enforce_pkce"] = basic["oidc_enforce_pkce"]
         if basic.get("oidc_debug"):
             oidc["enable_client_debug_messages"] = True
+        elif "enable_client_debug_messages" in oidc:
+            del oidc["enable_client_debug_messages"]
+        if basic.get("oidc_enable_pkce_plain"):
+            oidc["enable_pkce_plain_challenge"] = True
+        elif "enable_pkce_plain_challenge" in oidc:
+            del oidc["enable_pkce_plain_challenge"]
+        if basic.get("oidc_stateless_introspection"):
+            oidc["enable_jwt_access_token_stateless_introspection"] = True
+        elif "enable_jwt_access_token_stateless_introspection" in oidc:
+            del oidc["enable_jwt_access_token_stateless_introspection"]
+        if basic.get("oidc_require_par"):
+            oidc["require_pushed_authorization_requests"] = True
+        elif "require_pushed_authorization_requests" in oidc:
+            del oidc["require_pushed_authorization_requests"]
+        if basic.get("oidc_discovery_alg"):
+            oidc["discovery_signed_response_alg"] = basic["oidc_discovery_alg"]
+        if basic.get("oidc_discovery_key_id"):
+            oidc["discovery_signed_response_key_id"] = basic["oidc_discovery_key_id"]
+        if basic.get("oidc_min_param_entropy"):
+            try:
+                oidc["minimum_parameter_entropy"] = int(basic["oidc_min_param_entropy"])
+            except ValueError:
+                pass
         if lifespans:
             if not isinstance(oidc.get("lifespans"), dict):
                 oidc["lifespans"] = CommentedMap()

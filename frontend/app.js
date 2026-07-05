@@ -124,7 +124,14 @@ function renderConfigForms() {
   fillInput("cfg_oidc_ls_id", b.oidc_ls_id);
   fillInput("cfg_oidc_ls_refresh", b.oidc_ls_refresh);
   fillInput("cfg_oidc_ls_code", b.oidc_ls_code);
+  fillInput("cfg_oidc_ls_device", b.oidc_ls_device);
+  fillInput("cfg_oidc_discovery_alg", b.oidc_discovery_alg);
+  fillInput("cfg_oidc_discovery_key_id", b.oidc_discovery_key_id);
+  fillInput("cfg_oidc_min_param_entropy", b.oidc_min_param_entropy);
   $("cfg_oidc_debug").checked = !!b.oidc_debug;
+  $("cfg_oidc_enable_pkce_plain").checked = !!b.oidc_enable_pkce_plain;
+  $("cfg_oidc_stateless_introspection").checked = !!b.oidc_stateless_introspection;
+  $("cfg_oidc_require_par").checked = !!b.oidc_require_par;
   renderClients(b.oidc_clients || []);
 }
 
@@ -238,6 +245,34 @@ function clientRow(client, index) {
       <select class="c-consent">${opts(["", "auto", "explicit", "implicit", "pre-configured"], client.consent_mode)}</select></label>
     <label class="advanced-only">${esc(t("client.consentDuration"))}${help("help.client.consentDuration")}
       <input class="c-consentdur" value="${esc(client.pre_configured_consent_duration)}" placeholder="1y" /></label>
+    <label class="advanced-only">${esc(t("client.responseModes"))}${help("help.client.responseModes")}
+      <input class="c-respmodes" value="${esc(join(client.response_modes))}" placeholder="query, fragment, form_post" /></label>
+    <label class="advanced-only">${esc(t("client.idTokenAlg"))}${help("help.client.idTokenAlg")}
+      <select class="c-italg">${opts(["", "RS256", "ES256", "PS256"], client.id_token_signed_response_alg)}</select></label>
+    <label class="advanced-only">${esc(t("client.authzAlg"))}${help("help.client.authzAlg")}
+      <select class="c-authzalg">${opts(["", "none", "RS256", "ES256", "PS256"], client.authorization_signed_response_alg)}</select></label>
+    <label class="advanced-only">${esc(t("client.audienceMode"))}${help("help.client.audienceMode")}
+      <select class="c-audmode">${opts(["", "explicit", "implicit"], client.requested_audience_mode)}</select></label>
+    <label class="advanced-only">${esc(t("client.audience"))}${help("help.client.audience")}
+      <input class="c-audience" value="${esc(join(client.audience))}" placeholder="https://api.example.com" /></label>
+    <label class="advanced-only">${esc(t("client.lifespan"))}${help("help.client.lifespan")}
+      <input class="c-lifespan" value="${esc(client.lifespan)}" placeholder="custom_lifespan_name" /></label>
+    <label class="advanced-only">${esc(t("client.claimsPolicy"))}${help("help.client.claimsPolicy")}
+      <input class="c-claimspolicy" value="${esc(client.claims_policy)}" placeholder="custom_claims_policy_name" /></label>
+    <label class="advanced-only">${esc(t("client.sectorId"))}${help("help.client.sectorId")}
+      <input class="c-sector" value="${esc(client.sector_identifier_uri)}" placeholder="https://example.com/sector.json" /></label>
+    <label class="advanced-only">${esc(t("client.requestUris"))}${help("help.client.requestUris")}
+      <input class="c-requris" value="${esc(join(client.request_uris))}" placeholder="https://example.com/request.jwt" /></label>
+    <label class="advanced-only">${esc(t("client.jwksUri"))}${help("help.client.jwksUri")}
+      <input class="c-jwksuri" value="${esc(client.jwks_uri)}" placeholder="https://client.example.com/jwks.json" /></label>
+    <label class="advanced-only">${esc(t("client.revocationAuth"))}${help("help.client.revocationAuth")}
+      <select class="c-revauth">${opts(["", "client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "none"], client.revocation_endpoint_auth_method)}</select></label>
+    <label class="advanced-only">${esc(t("client.introspectionAuth"))}${help("help.client.introspectionAuth")}
+      <select class="c-introauth">${opts(["", "client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "none"], client.introspection_endpoint_auth_method)}</select></label>
+    <label class="advanced-only checkbox-row">
+      <input class="c-multiauth" type="checkbox" ${client.allow_multiple_auth_methods ? "checked" : ""} /> ${esc(t("client.multiAuth"))}${help("help.client.multiAuth")}</label>
+    <label class="advanced-only checkbox-row">
+      <input class="c-reqpar" type="checkbox" ${client.require_pushed_authorization_requests ? "checked" : ""} /> ${esc(t("client.requirePar"))}${help("help.client.requirePar")}</label>
   `;
   box.appendChild(grid);
   grid.querySelector(".btn-hash").onclick = () => hashSecret(grid.querySelector(".c-secret"));
@@ -278,6 +313,20 @@ function collectClients() {
     userinfo_signed_response_alg: box.querySelector(".c-uialg").value,
     consent_mode: box.querySelector(".c-consent").value,
     pre_configured_consent_duration: box.querySelector(".c-consentdur").value,
+    response_modes: split(box.querySelector(".c-respmodes").value),
+    id_token_signed_response_alg: box.querySelector(".c-italg").value,
+    authorization_signed_response_alg: box.querySelector(".c-authzalg").value,
+    requested_audience_mode: box.querySelector(".c-audmode").value,
+    audience: split(box.querySelector(".c-audience").value),
+    lifespan: box.querySelector(".c-lifespan").value,
+    claims_policy: box.querySelector(".c-claimspolicy").value,
+    sector_identifier_uri: box.querySelector(".c-sector").value,
+    request_uris: split(box.querySelector(".c-requris").value),
+    jwks_uri: box.querySelector(".c-jwksuri").value,
+    revocation_endpoint_auth_method: box.querySelector(".c-revauth").value,
+    introspection_endpoint_auth_method: box.querySelector(".c-introauth").value,
+    allow_multiple_auth_methods: box.querySelector(".c-multiauth").checked,
+    require_pushed_authorization_requests: box.querySelector(".c-reqpar").checked,
   }));
 }
 
@@ -302,6 +351,13 @@ function collectConfigBasic() {
     oidc_ls_id: $("cfg_oidc_ls_id").value,
     oidc_ls_refresh: $("cfg_oidc_ls_refresh").value,
     oidc_ls_code: $("cfg_oidc_ls_code").value,
+    oidc_ls_device: $("cfg_oidc_ls_device").value,
+    oidc_enable_pkce_plain: $("cfg_oidc_enable_pkce_plain").checked,
+    oidc_stateless_introspection: $("cfg_oidc_stateless_introspection").checked,
+    oidc_discovery_alg: $("cfg_oidc_discovery_alg").value,
+    oidc_discovery_key_id: $("cfg_oidc_discovery_key_id").value,
+    oidc_require_par: $("cfg_oidc_require_par").checked,
+    oidc_min_param_entropy: $("cfg_oidc_min_param_entropy").value,
     oidc_clients: collectClients(),
   };
 }
@@ -571,7 +627,14 @@ function wireEvents() {
   $("addClientBtn").onclick = () =>
     $("clientsList").appendChild(clientRow(
       { client_id: "", client_name: "", client_secret: "", public: false, authorization_policy: "",
-        redirect_uris: [], scopes: [], grant_types: [], response_types: [], token_endpoint_auth_method: "" },
+        redirect_uris: [], scopes: [], grant_types: [], response_types: [], token_endpoint_auth_method: "",
+        require_pkce: false, pkce_challenge_method: "", access_token_signed_response_alg: "",
+        userinfo_signed_response_alg: "", consent_mode: "", pre_configured_consent_duration: "",
+        response_modes: [], id_token_signed_response_alg: "", authorization_signed_response_alg: "",
+        requested_audience_mode: "", audience: [], lifespan: "", claims_policy: "",
+        sector_identifier_uri: "", request_uris: [], jwks_uri: "",
+        revocation_endpoint_auth_method: "", introspection_endpoint_auth_method: "",
+        allow_multiple_auth_methods: false, require_pushed_authorization_requests: false },
       $("clientsList").children.length));
 
   $("applyRawBtn").onclick = () => loadText($("rawYaml").value);
