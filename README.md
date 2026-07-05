@@ -1,6 +1,8 @@
 # Authelia Config GUI
 
-**Version: v0.1.3**
+First of all, I'm not a coder at all. This project was totally done with vibe coding. If you have any suggestions you are welcome. I will be glad to take it in consideration, but don't start any kind of flames about that!
+
+**Version: v0.1**
 
 A simple web interface for **uploading, editing and generating** Authelia’s
 configuration files (`configuration.yml` and `users_database.yml`), which
