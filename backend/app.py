@@ -201,6 +201,10 @@ def parse_config(text: str) -> dict:
                 "userinfo_signed_response_alg": client.get(
                     "userinfo_signed_response_alg", ""
                 ),
+                "consent_mode": client.get("consent_mode", ""),
+                "pre_configured_consent_duration": str(
+                    client.get("pre_configured_consent_duration", "") or ""
+                ),
             }
         )
 
@@ -284,6 +288,8 @@ def _build_client(client: dict, base=None) -> CommentedMap:
     put("pkce_challenge_method", client.get("pkce_challenge_method"))
     put("access_token_signed_response_alg", client.get("access_token_signed_response_alg"))
     put("userinfo_signed_response_alg", client.get("userinfo_signed_response_alg"))
+    put("consent_mode", client.get("consent_mode"))
+    put("pre_configured_consent_duration", client.get("pre_configured_consent_duration"))
     return out
 
 

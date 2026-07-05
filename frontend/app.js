@@ -234,6 +234,10 @@ function clientRow(client, index) {
       <select class="c-atalg">${opts(["", "none", "RS256", "ES256", "PS256"], client.access_token_signed_response_alg)}</select></label>
     <label class="advanced-only">${esc(t("client.userinfoAlg"))}${help("help.client.userinfoAlg")}
       <select class="c-uialg">${opts(["", "none", "RS256", "ES256", "PS256"], client.userinfo_signed_response_alg)}</select></label>
+    <label class="advanced-only">${esc(t("client.consentMode"))}${help("help.client.consentMode")}
+      <select class="c-consent">${opts(["", "auto", "explicit", "implicit", "pre-configured"], client.consent_mode)}</select></label>
+    <label class="advanced-only">${esc(t("client.consentDuration"))}${help("help.client.consentDuration")}
+      <input class="c-consentdur" value="${esc(client.pre_configured_consent_duration)}" placeholder="1y" /></label>
   `;
   box.appendChild(grid);
   grid.querySelector(".btn-hash").onclick = () => hashSecret(grid.querySelector(".c-secret"));
@@ -272,6 +276,8 @@ function collectClients() {
     pkce_challenge_method: box.querySelector(".c-pkcemethod").value,
     access_token_signed_response_alg: box.querySelector(".c-atalg").value,
     userinfo_signed_response_alg: box.querySelector(".c-uialg").value,
+    consent_mode: box.querySelector(".c-consent").value,
+    pre_configured_consent_duration: box.querySelector(".c-consentdur").value,
   }));
 }
 
