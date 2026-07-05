@@ -1,5 +1,7 @@
 # Authelia Config GUI
 
+**Versione: v0.1**
+
 Interfaccia web semplice per **caricare, modificare e generare** i file di
 configurazione di Authelia (`configuration.yml` e `users_database.yml`), da
 copiare poi sul server.
