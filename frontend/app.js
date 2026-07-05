@@ -226,6 +226,14 @@ function clientRow(client, index) {
       <input class="c-response" value="${esc(join(client.response_types))}" placeholder="code" /></label>
     <label class="advanced-only">${esc(t("client.tokenAuth"))}${help("help.client.tokenAuth")}
       <select class="c-tokenauth">${opts(["", "client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "none"], client.token_endpoint_auth_method)}</select></label>
+    <label class="advanced-only checkbox-row">
+      <input class="c-reqpkce" type="checkbox" ${client.require_pkce ? "checked" : ""} /> ${esc(t("client.requirePkce"))}${help("help.client.requirePkce")}</label>
+    <label class="advanced-only">${esc(t("client.pkceMethod"))}${help("help.client.pkceMethod")}
+      <select class="c-pkcemethod">${opts(["", "S256", "plain"], client.pkce_challenge_method)}</select></label>
+    <label class="advanced-only">${esc(t("client.accessTokenAlg"))}${help("help.client.accessTokenAlg")}
+      <select class="c-atalg">${opts(["", "none", "RS256", "ES256", "PS256"], client.access_token_signed_response_alg)}</select></label>
+    <label class="advanced-only">${esc(t("client.userinfoAlg"))}${help("help.client.userinfoAlg")}
+      <select class="c-uialg">${opts(["", "none", "RS256", "ES256", "PS256"], client.userinfo_signed_response_alg)}</select></label>
   `;
   box.appendChild(grid);
   grid.querySelector(".btn-hash").onclick = () => hashSecret(grid.querySelector(".c-secret"));
@@ -260,6 +268,10 @@ function collectClients() {
     grant_types: split(box.querySelector(".c-grant").value),
     response_types: split(box.querySelector(".c-response").value),
     token_endpoint_auth_method: box.querySelector(".c-tokenauth").value,
+    require_pkce: box.querySelector(".c-reqpkce").checked,
+    pkce_challenge_method: box.querySelector(".c-pkcemethod").value,
+    access_token_signed_response_alg: box.querySelector(".c-atalg").value,
+    userinfo_signed_response_alg: box.querySelector(".c-uialg").value,
   }));
 }
 

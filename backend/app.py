@@ -193,6 +193,14 @@ def parse_config(text: str) -> dict:
                 "grant_types": as_list(client.get("grant_types")),
                 "response_types": as_list(client.get("response_types")),
                 "token_endpoint_auth_method": client.get("token_endpoint_auth_method", ""),
+                "require_pkce": bool(client.get("require_pkce", False)),
+                "pkce_challenge_method": client.get("pkce_challenge_method", ""),
+                "access_token_signed_response_alg": client.get(
+                    "access_token_signed_response_alg", ""
+                ),
+                "userinfo_signed_response_alg": client.get(
+                    "userinfo_signed_response_alg", ""
+                ),
             }
         )
 
@@ -269,6 +277,13 @@ def _build_client(client: dict, base=None) -> CommentedMap:
     for key in ("redirect_uris", "scopes", "grant_types", "response_types"):
         put(key, [v.strip() for v in client.get(key, []) if str(v).strip()])
     put("token_endpoint_auth_method", client.get("token_endpoint_auth_method"))
+    if client.get("require_pkce"):
+        out["require_pkce"] = True
+    elif "require_pkce" in out:
+        del out["require_pkce"]
+    put("pkce_challenge_method", client.get("pkce_challenge_method"))
+    put("access_token_signed_response_alg", client.get("access_token_signed_response_alg"))
+    put("userinfo_signed_response_alg", client.get("userinfo_signed_response_alg"))
     return out
 
 
