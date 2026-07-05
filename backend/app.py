@@ -11,10 +11,11 @@ import json
 from pathlib import Path
 
 from argon2 import PasswordHasher, Type
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
@@ -22,7 +23,39 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
 LOCALES_DIR = FRONTEND_DIR / "locales"
 
+# Input limits: YAML files are small in practice; argon2 allocates 64 MB per
+# hash call, so unbounded inputs would be an easy DoS vector.
+MAX_YAML_BYTES = 2_000_000
+MAX_PASSWORD_LEN = 1024
+
 app = FastAPI(title="Authelia Config GUI")
+
+# Compress larger responses (generated YAML, static JS/CSS).
+app.add_middleware(GZipMiddleware, minimum_size=1024)
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    """Add hardening headers and sane caching to every response."""
+    response = await call_next(request)
+    headers = response.headers
+    headers.setdefault("X-Content-Type-Options", "nosniff")
+    headers.setdefault("X-Frame-Options", "DENY")
+    headers.setdefault("Referrer-Policy", "no-referrer")
+    # 'unsafe-inline' is needed for the inline theme bootstrap script.
+    headers.setdefault(
+        "Content-Security-Policy",
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
+        "connect-src 'self'; frame-ancestors 'none'",
+    )
+    if request.url.path.startswith("/api"):
+        # API responses carry secrets/hashes: never store them.
+        headers.setdefault("Cache-Control", "no-store")
+    else:
+        # Static assets: always revalidate (ETag/304) so updates apply immediately.
+        headers.setdefault("Cache-Control", "no-cache")
+    return response
 
 # --- YAML: preserve comments, order, quotes ------------------------------------
 yaml = YAML()
@@ -92,21 +125,21 @@ def set_path(data, keys, value):
 
 # --- Request models ------------------------------------------------------------
 class ParseReq(BaseModel):
-    yaml: str = ""
+    yaml: str = Field(default="", max_length=MAX_YAML_BYTES)
 
 
 class ConfigBuildReq(BaseModel):
-    yaml: str = ""
+    yaml: str = Field(default="", max_length=MAX_YAML_BYTES)
     basic: dict
 
 
 class UsersBuildReq(BaseModel):
-    yaml: str = ""
+    yaml: str = Field(default="", max_length=MAX_YAML_BYTES)
     users: list
 
 
 class HashReq(BaseModel):
-    password: str
+    password: str = Field(max_length=MAX_PASSWORD_LEN)
 
 
 # --- configuration.yml ---------------------------------------------------------

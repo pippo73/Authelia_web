@@ -69,6 +69,23 @@ Sul file caricato vengono modificati **solo** i campi gestiti dai form; commenti
 e sezioni non toccate (`storage`, `notifier`, `authentication_backend`, ...)
 restano intatti grazie a `ruamel.yaml`.
 
+## Note di sicurezza
+
+La GUI **non ha autenticazione propria** e parla col backend in HTTP semplice:
+contenuti di configurazione e segreti vi transitano. Usala **solo su rete
+fidata** (localhost, LAN, VPN/tailnet) — non esporla su internet, oppure
+mettila dietro un reverse proxy con TLS e autenticazione (es. dietro la stessa
+Authelia).
+
+Hardening integrato:
+
+- le risposte includono header di sicurezza (CSP, `X-Content-Type-Options`,
+  `X-Frame-Options`, `Referrer-Policy`); le risposte API sono `no-store`;
+- limiti sulle richieste (YAML 2 MB, password 1 KB) prevengono DoS banali
+  tramite l'endpoint di hashing argon2;
+- il container gira come **utente non privilegiato** e ha un healthcheck;
+- nulla è persistito lato server: i file vivono solo nella sessione del browser.
+
 ## Limiti noti (v1)
 
 - La modifica **base** delle regole `access_control` **ricrea** la lista con i

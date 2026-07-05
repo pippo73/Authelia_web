@@ -69,6 +69,23 @@ If a key is missing from a translation, the key itself is displayed.
 and untouched sections (`storage`, `notifier`, `authentication_backend`, etc.)
 remain intact thanks to `ruamel.yaml`.
 
+## Security notes
+
+The GUI has **no authentication of its own** and talks to its backend over
+plain HTTP: configuration content and secrets pass through it. Run it on a
+**trusted network only** (localhost, LAN, VPN/tailnet) — do not expose it to
+the internet, or put it behind a reverse proxy with TLS and authentication
+(e.g. behind Authelia itself).
+
+Built-in hardening:
+
+- responses carry security headers (CSP, `X-Content-Type-Options`,
+  `X-Frame-Options`, `Referrer-Policy`); API responses are `no-store`;
+- request size limits (2 MB YAML, 1 KB passwords) prevent trivial DoS via the
+  argon2 hashing endpoint;
+- the container runs as an **unprivileged user** and includes a healthcheck;
+- nothing is persisted server-side: files live only in your browser session.
+
 ## Known limitations (v1)
 
 - **Basic** editing of `access_control` rules **regenerates** the list of
