@@ -38,7 +38,7 @@
   "oidc.lifespanRefresh": "Refresh token lifespan",
   "oidc.lifespanCode": "Authorize code lifespan",
   "oidc.clients": "Clients",
-  "oidc.clientsHint": "Registered OIDC clients. Unmanaged per-client keys (consent_mode, etc.) are preserved when editing.",
+  "oidc.clientsHint": "Registered OIDC clients. Unmanaged per-client keys (requested_audience_mode, per-client jwks, etc.) are preserved when editing.",
   "oidc.addClient": "+ Add client",
   "client.label": "Client #{n}",
   "client.id": "Client ID",
