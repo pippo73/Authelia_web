@@ -562,9 +562,21 @@ function wireEvents() {
   $("copyBtn").onclick = copyOutput;
 }
 
+// Show the app version (from /api/version) next to the project name.
+async function initVersion() {
+  try {
+    const res = await fetch("/api/version");
+    const { version } = await res.json();
+    if (version) $("appVersion").textContent = "v" + version;
+  } catch (_) {
+    // non-essential: leave the badge empty if the call fails
+  }
+}
+
 async function init() {
   wireEvents();
   initTheme();
+  initVersion();
   await initLanguage();
   setActiveFile("config");
 }

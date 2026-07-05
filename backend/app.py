@@ -28,7 +28,13 @@ LOCALES_DIR = FRONTEND_DIR / "locales"
 MAX_YAML_BYTES = 2_000_000
 MAX_PASSWORD_LEN = 1024
 
-app = FastAPI(title="Authelia Config GUI")
+# Single source of truth for the app version: the VERSION file at repo root.
+try:
+    APP_VERSION = (BASE_DIR / "VERSION").read_text(encoding="utf-8").strip()
+except OSError:
+    APP_VERSION = "dev"
+
+app = FastAPI(title="Authelia Config GUI", version=APP_VERSION)
 
 # Compress larger responses (generated YAML, static JS/CSS).
 app.add_middleware(GZipMiddleware, minimum_size=1024)
@@ -464,6 +470,11 @@ def api_locales():
                 continue
             out.append({"code": path.stem, "name": data.get("_name", path.stem)})
     return out
+
+
+@app.get("/api/version")
+def api_version():
+    return {"version": APP_VERSION}
 
 
 @app.get("/api/health")
